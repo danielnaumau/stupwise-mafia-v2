@@ -1,13 +1,13 @@
 package stupwise.websocket
 
-import cats.implicits._
 import cats.effect.Concurrent
+import cats.implicits._
 import fs2._
 import fs2.concurrent.Topic
 import org.http4s.websocket.WebSocketFrame
 import org.http4s.websocket.WebSocketFrame.{Close, Text}
+import stupwise.websocket.Protocol.OutcomeMessage
 import stupwise.websocket.Protocol.OutcomeMessage.{DecodingError, SocketClosed}
-import stupwise.websocket.Protocol.{IncomeMessage, OutcomeMessage}
 
 trait Handler[F[_]] {
   def send: Stream[F, Text]
@@ -26,13 +26,13 @@ object Handler {
           .map(msg => Text(Codecs.encode(msg)))
 
       def decode(frame: WebSocketFrame): F[List[OutcomeMessage]] = frame match {
-        case Close(_)     =>  List[OutcomeMessage](SocketClosed(playerId)).pure[F]
+        case Close(_)     => List[OutcomeMessage](SocketClosed(playerId)).pure[F]
         case Text(msg, _) =>
           Codecs
             .decode(msg)
             .fold(
               err => List[OutcomeMessage](DecodingError(playerId, err.getMessage)).pure[F],
-              msg => Dispatcher.dispatch(playerId, msg)
+              msg => Dispatcher.dispatch[F](playerId, msg)
             )
         case e            => List[OutcomeMessage](DecodingError(playerId, s" Unexpected WS message: $e")).pure[F]
       }
