@@ -1,10 +1,7 @@
 import Dependencies.Libraries
 
-name := "stupwise-mafia-v2"
-
-version := "0.1"
-
-scalaVersion := "2.13.8"
+ThisBuild / version := "0.1"
+ThisBuild / scalaVersion     := "2.13.8"
 
 ThisBuild / scalacOptions ++= Seq(
   "-feature",
