@@ -4,6 +4,8 @@ object Dependencies {
   object V {
     val http4s = "0.23.7"
     val circe  = "0.14.1"
+    val redis4cats = "1.0.0"
+
   }
 
   object Libraries {
@@ -17,5 +19,7 @@ object Dependencies {
 
     val http4sDsl     = http4s("dsl")
     val http4sServer  = http4s("blaze-server")
+
+    val redis4catsEffects = "dev.profunktor" %% "redis4cats-effects" % V.redis4cats
   }
 }
