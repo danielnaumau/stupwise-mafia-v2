@@ -1,10 +1,11 @@
-package stupwise.lobby
+package stupwise.websocket
 
 import pureconfig.ConfigReader
 import pureconfig.generic.semiauto.deriveReader
 
 case class KafkaTopicSettings(
-  lobby: String
+  gameEvents: String, // events from processors to websocket
+  commands: String    // commands from websocket to game processor
 )
 
 object KafkaTopicSettings {

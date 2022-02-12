@@ -24,10 +24,6 @@ val commonSettings = List(
   )
 )
 
-lazy val websocket = (project in file("modules/websocket"))
-  .enablePlugins(DockerPlugin)
-  .settings(commonSettings: _*)
-
 lazy val common = (project in file("modules/common"))
   .enablePlugins(DockerPlugin)
   .settings(commonSettings: _*)
@@ -35,3 +31,7 @@ lazy val common = (project in file("modules/common"))
     addCompilerPlugin(`kind-projector`),
     libraryDependencies ++= Seq(Libraries.fs2Kafka, Libraries.catsEffect)
   )
+
+lazy val websocket = (project in file("modules/websocket"))
+  .dependsOn(common)
+  .enablePlugins(DockerPlugin)
