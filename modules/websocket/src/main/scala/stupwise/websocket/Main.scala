@@ -3,10 +3,13 @@ package stupwise.websocket
 import cats.effect.{ExitCode, IO, IOApp}
 import fs2.concurrent.Topic
 import org.http4s.server.websocket.WebSocketBuilder2
+import stupwise.common.kafka.KafkaComponents
 import stupwise.websocket.GenUUIDInstances._
 import stupwise.websocket.Protocol.OutMessage
 
 object Main extends IOApp with KafkaComponents with Codecs {
+  val gameEventsProcessor = new GameEventsProcessor.Live[IO]
+
   def run(args: List[String]): IO[ExitCode] =
     (for {
       topic        <- fs2.Stream.eval(Topic[IO, OutMessage])

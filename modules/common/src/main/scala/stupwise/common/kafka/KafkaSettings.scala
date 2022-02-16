@@ -1,4 +1,4 @@
-package stupwise.common
+package stupwise.common.kafka
 
 import pureconfig.generic.semiauto.deriveReader
 

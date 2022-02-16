@@ -35,3 +35,10 @@ lazy val common = (project in file("modules/common"))
 lazy val websocket = (project in file("modules/websocket"))
   .dependsOn(common)
   .enablePlugins(DockerPlugin)
+
+lazy val lobby = (project in file("modules/lobby"))
+  .dependsOn(common)
+  .enablePlugins(DockerPlugin)
+  .settings(
+    libraryDependencies ++= Seq(Libraries.redis4catsEffects)
+  )

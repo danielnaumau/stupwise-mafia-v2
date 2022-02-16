@@ -1,8 +1,6 @@
 package stupwise.lobby
 
-
-import stupwise.lobby.Models.Player
-
+import stupwise.common.models.KafkaMsg.Player
 import scala.util.Random
 
 sealed trait State {
@@ -12,7 +10,6 @@ sealed trait State {
 }
 
 object State {
-
   final case class RoomState(players: List[Player], version: Int, roomId: String) extends State {
     override def key: String = s"state-lobby-$roomId-$version"
     override def keyPattern: String = s"state-lobby-$roomId-*"

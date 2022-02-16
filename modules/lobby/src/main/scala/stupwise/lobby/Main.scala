@@ -1,34 +1,30 @@
 package stupwise.lobby
 
 import cats.effect.{ExitCode, IO, IOApp}
-import cats.implicits.catsSyntaxApplicativeId
 import dev.profunktor.redis4cats.Redis
-import dev.profunktor.redis4cats.effect.Log.Stdout._
-import stupwise.lobby.Models.{Command, Player}
+import dev.profunktor.redis4cats.effect.Log.NoOp.instance
+import fs2.kafka.ConsumerRecord
+import io.circe.generic.codec.DerivedAsObjectCodec.deriveCodec
+import stupwise.common.kafka.KafkaComponents
+import stupwise.common.models.KafkaMsg.{Command, Event}
 import stupwise.lobby.State.RoomState
 
-import java.util.UUID
-
-object Main extends IOApp {
+object Main extends IOApp with KafkaComponents {
 
   override def run(args: List[String]): IO[ExitCode] = {
-    val r = Redis[IO]
+    Redis[IO]
       .utf8("redis://localhost:6379")
-      .map(new StateStore[IO](_))
-      .use { store =>
-        for {
-          test <- store.set(RoomState(List(Player(UUID.randomUUID(), "test")), 8, "rew242s"))
-          _    <- store.set(RoomState(List(Player(UUID.randomUUID(), "test")), 2, "rew242s"))
-          res  <- store.latest("state-lobby-rew242s-*")
-          _    <- println(test).pure[IO]
-          _    <- println(res).pure[IO]
-        } yield ()
-      }
-    r.as(ExitCode.Success)
+      .map(new StateStore[IO, RoomState](_))
+      .use { stateStore =>
+        val handler = LobbyHandler(stateStore)
+        val eventStream = subscribe(kafkaConfiguration.topics.commands, processRecord(handler))
+        publish("res-topic", eventStream)
+      }.as(ExitCode.Success)
   }
 
-  def processCommand(command: Command) = {
-
+  def processRecord(handler: LobbyHandler[IO])(record: ConsumerRecord[Unit, Command]): IO[Event] = {
+    handler.handle(record.value)
   }
+
 
 }

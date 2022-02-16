@@ -1,9 +1,10 @@
-package stupwise.common
+package stupwise.common.kafka
 
 import cats.effect.{Async, Concurrent, ExitCode}
-import cats.implicits._
+import cats.implicits.toFunctorOps
 import fs2.kafka._
 import io.circe.Encoder
+import stupwise.common.Codecs
 
 object Fs2KafkaPublisher {
 

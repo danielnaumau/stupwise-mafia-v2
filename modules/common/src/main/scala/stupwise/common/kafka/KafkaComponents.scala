@@ -1,11 +1,10 @@
-package stupwise.websocket
+package stupwise.common.kafka
 
 import cats.effect.IO
 import com.typesafe.config.{Config, ConfigFactory}
 import fs2.kafka.ConsumerRecord
 import io.circe.{Decoder, Encoder}
 import pureconfig.ConfigReader
-import stupwise.common.{Fs2KafkaComponent, Fs2KafkaConsumer, Fs2KafkaPublisher}
 
 trait KafkaComponents extends Fs2KafkaComponent[KafkaTopicSettings] {
   override implicit val kafkaTopicSettingsReader: ConfigReader[KafkaTopicSettings] =
@@ -13,9 +12,9 @@ trait KafkaComponents extends Fs2KafkaComponent[KafkaTopicSettings] {
 
   override def config: Config = ConfigFactory.load()
 
-  def subscribe[V: Decoder](topic: String, processRecord: ConsumerRecord[Unit, V] => IO[Unit]) =
+  def subscribe[V: Decoder, R](topic: String, processRecord: ConsumerRecord[Unit, V] => IO[R]) =
     Fs2KafkaConsumer
-      .consume[IO, V](
+      .consume[IO, V, R](
         topic = topic,
         kafkaSettings = kafkaConfiguration.settings,
         processRecord = processRecord
@@ -27,6 +26,4 @@ trait KafkaComponents extends Fs2KafkaComponent[KafkaTopicSettings] {
       kafkaSettings = kafkaConfiguration.settings,
       eventStream = eventStream
     )
-
-  val gameEventsProcessor = new GameEventsProcessor.Live[IO]
 }

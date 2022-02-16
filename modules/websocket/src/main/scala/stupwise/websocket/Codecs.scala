@@ -3,7 +3,9 @@ package stupwise.websocket
 import io.circe.generic.extras.Configuration
 import io.circe.generic.extras.semiauto.{deriveConfiguredDecoder, deriveConfiguredEncoder}
 import io.circe.syntax.EncoderOps
-import io.circe.{jawn, Decoder, Encoder, Error}
+import io.circe.{Decoder, Encoder, Error, jawn}
+import stupwise.common.models.KafkaMsg
+import stupwise.common.models.KafkaMsg.{Command, Event, Player}
 import stupwise.websocket.Protocol._
 
 trait Codecs {
@@ -11,7 +13,10 @@ trait Codecs {
 
   implicit val incomeMessageDecoder: Decoder[InMessage]   = deriveConfiguredDecoder
   implicit val outcomeMessageEncoder: Encoder[OutMessage] = deriveConfiguredEncoder
+  implicit val commandDecoder: Decoder[Command]           = deriveConfiguredDecoder
+  implicit val playerDecoder: Decoder[Player]             = deriveConfiguredDecoder
   implicit val eventDecoder: Decoder[Event]               = deriveConfiguredDecoder
+  implicit val kafkaMsgDecoder: Decoder[KafkaMsg]         = deriveConfiguredDecoder
 }
 
 object Codecs {
