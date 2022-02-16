@@ -3,7 +3,6 @@ package stupwise.lobby
 import cats._
 import cats.syntax.all._
 import dev.profunktor.redis4cats.RedisCommands
-import stupwise.lobby.Models.State
 import io.circe.parser.{decode => jsonDecode}
 import io.circe.generic.auto._
 import io.circe.syntax.EncoderOps
@@ -20,7 +19,4 @@ final class StateStore[F[_]: FlatMap](redis: RedisCommands[F, String, String]) {
       result   = values.flatMap(jsonDecode[State](_).toOption).toList.sortBy(_.version).lastOption
     } yield result
   }
-
-
-
 }
