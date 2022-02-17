@@ -2,16 +2,17 @@ package stupwise.websocket
 
 import cats.Applicative
 import cats.implicits.catsSyntaxApplicativeId
-import Protocol.OutMessage.TestResultMsg
-import Protocol.{InMessage, OutMessage}
+import stupwise.common.models.KafkaMsg.InitRoom
+import stupwise.common.models.{KafkaMsg, Player}
+import stupwise.websocket.Protocol.InMessage
 
 import java.util.UUID
 
 object Dispatcher {
-  def dispatch[F[_]: Applicative](playerId: UUID, msg: InMessage): F[List[OutMessage]] = {
+  def dispatch[F[_]: Applicative](playerId: UUID, msg: InMessage): F[List[KafkaMsg]] = {
     val mappedMsg = msg match {
-      case InMessage.TestMsg(value) => TestResultMsg(playerId, msg = value)
+      case InMessage.InitRoom(userName) => InitRoom(UUID.randomUUID(), Player(playerId, userName))
     }
-    List[OutMessage](mappedMsg).pure[F]
+    List[KafkaMsg](mappedMsg).pure[F]
   }
 }

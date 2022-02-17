@@ -16,11 +16,11 @@ import java.nio.charset.StandardCharsets
 trait Codecs {
   implicit val withDiscriminatorConfig: Configuration = Configuration.default.withDiscriminator("type")
 
-  implicit val commandDecoder: Decoder[Command]   = deriveConfiguredDecoder
+  implicit val commandCodec: Codec[Command]       = deriveConfiguredCodec
   implicit val playerCodec: Codec[Player]         = deriveConfiguredCodec
   implicit val eventEncoder: Encoder[Event]       = deriveConfiguredEncoder
   implicit val eventDecoder: Decoder[Event]       = deriveConfiguredDecoder
-  implicit val kafkaMsgDecoder: Decoder[KafkaMsg] = deriveConfiguredDecoder
+  implicit val kafkaMsgCodec: Codec[KafkaMsg]     = deriveConfiguredCodec
   implicit val roomStateDecoder: Codec[RoomState] = deriveConfiguredCodec
   implicit val stateDecoder: Codec[State]         = deriveConfiguredCodec
 }

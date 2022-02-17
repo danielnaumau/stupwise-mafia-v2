@@ -1,10 +1,10 @@
 package stupwise.websocket
 
+import io.circe.generic.extras.semiauto.{deriveConfiguredDecoder, deriveConfiguredEncoder}
 import io.circe.syntax.EncoderOps
 import io.circe.{jawn, Decoder, Encoder, Error}
-import Protocol._
-import io.circe.generic.extras.semiauto.{deriveConfiguredDecoder, deriveConfiguredEncoder}
 import stupwise.common.Codecs
+import stupwise.websocket.Protocol._
 
 trait WSCodecs extends Codecs {
   implicit val incomeMessageDecoder: Decoder[InMessage]   = deriveConfiguredDecoder
