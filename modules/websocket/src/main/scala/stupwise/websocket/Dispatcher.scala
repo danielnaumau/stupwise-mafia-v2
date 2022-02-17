@@ -2,8 +2,8 @@ package stupwise.websocket
 
 import cats.Applicative
 import cats.implicits.catsSyntaxApplicativeId
-import stupwise.websocket.Protocol.OutMessage.TestResultMsg
-import stupwise.websocket.Protocol.{InMessage, OutMessage}
+import Protocol.OutMessage.TestResultMsg
+import Protocol.{InMessage, OutMessage}
 
 import java.util.UUID
 

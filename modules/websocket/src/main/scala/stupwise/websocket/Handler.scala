@@ -7,8 +7,8 @@ import fs2.concurrent.Topic
 import io.circe.{Decoder, Encoder}
 import org.http4s.websocket.WebSocketFrame
 import org.http4s.websocket.WebSocketFrame.{Close, Text}
-import stupwise.websocket.Protocol.OutMessage.{DecodingError, SocketClosed}
-import stupwise.websocket.Protocol.{InMessage, OutMessage}
+import Protocol.OutMessage.{DecodingError, SocketClosed}
+import Protocol.{InMessage, OutMessage}
 
 trait Handler[F[_]] {
   def send: Stream[F, Text]
@@ -26,12 +26,12 @@ object Handler {
           topic
             .subscribe(1000)
             .filter(_.playerId == playerId)
-            .map(msg => Text(Codecs.encode(msg)))
+            .map(msg => Text(WSCodecs.encode(msg)))
 
         def decode(frame: WebSocketFrame): F[List[OutMessage]] = frame match {
           case Close(_)     => List[OutMessage](SocketClosed(playerId)).pure[F]
           case Text(msg, _) =>
-            Codecs
+            WSCodecs
               .decode(msg)
               .fold(
                 err => List[OutMessage](DecodingError(playerId, err.getMessage)).pure[F],
