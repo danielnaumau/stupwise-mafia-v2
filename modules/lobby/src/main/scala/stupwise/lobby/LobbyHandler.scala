@@ -3,7 +3,7 @@ package stupwise.lobby
 import cats.Applicative
 import cats.implicits._
 import stupwise.common.models.KafkaMsg._
-import stupwise.lobby.State.RoomState
+import stupwise.common.models.State.RoomState
 
 final case class LobbyHandler[F[_]: Applicative](stateStore: StateStore[F, RoomState]) {
   def handle(command: Command): F[Event] = command match {
