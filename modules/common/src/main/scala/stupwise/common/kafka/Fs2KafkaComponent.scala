@@ -1,4 +1,4 @@
-package stupwise.common
+package stupwise.common.kafka
 
 import com.typesafe.config.Config
 import pureconfig.{ConfigReader, ConfigSource}
@@ -11,5 +11,4 @@ trait Fs2KafkaComponent[KafkaTopicSettings] {
 
   lazy val kafkaConfiguration =
     ConfigSource.fromConfig(config).at("kafka").loadOrThrow[KafkaConfiguration[KafkaTopicSettings]]
-
 }

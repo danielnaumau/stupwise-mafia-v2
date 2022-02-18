@@ -7,7 +7,8 @@ import fs2.concurrent.Topic
 import io.circe.{Decoder, Encoder}
 import org.http4s.websocket.WebSocketFrame
 import org.http4s.websocket.WebSocketFrame.{Close, Text}
-import stupwise.websocket.Protocol.OutMessage.{DecodingError, SocketClosed}
+import stupwise.common.models.KafkaMsg
+import stupwise.common.models.KafkaMsg.CustomError
 import stupwise.websocket.Protocol.{InMessage, OutMessage}
 
 trait Handler[F[_]] {
@@ -18,7 +19,7 @@ trait Handler[F[_]] {
 object Handler {
   def make[F[_]: Concurrent: GenUUID](
     topic: Topic[F, OutMessage],
-    publish: fs2.Stream[F, OutMessage] => F[Unit]
+    publish: fs2.Stream[F, KafkaMsg] => F[Unit]
   )(implicit outEncoder: Encoder[OutMessage], inDecoder: Decoder[InMessage]): F[Handler[F]] = GenUUID[F].generate.map {
     playerId =>
       new Handler[F] {
@@ -26,18 +27,18 @@ object Handler {
           topic
             .subscribe(1000)
             .filter(_.playerId == playerId)
-            .map(msg => Text(Codecs.encode(msg)))
+            .map(msg => Text(WSCodecs.encode(msg)))
 
-        def decode(frame: WebSocketFrame): F[List[OutMessage]] = frame match {
-          case Close(_)     => List[OutMessage](SocketClosed(playerId)).pure[F]
+        def decode(frame: WebSocketFrame): F[List[KafkaMsg]] = frame match {
+          case Close(_)     => List[KafkaMsg](CustomError(playerId, "socket closed")).pure[F]
           case Text(msg, _) =>
-            Codecs
+            WSCodecs
               .decode(msg)
               .fold(
-                err => List[OutMessage](DecodingError(playerId, err.getMessage)).pure[F],
+                err => List[KafkaMsg](CustomError(playerId, err.getMessage)).pure[F],
                 msg => Dispatcher.dispatch[F](playerId, msg)
               )
-          case e            => List[OutMessage](DecodingError(playerId, s" Unexpected WS message: $e")).pure[F]
+          case e            => List[KafkaMsg](CustomError(playerId, s" Unexpected WS message: $e")).pure[F]
         }
 
         def receive(wsfStream: Stream[F, WebSocketFrame]): Stream[F, Unit] =
