@@ -19,7 +19,7 @@ object Main extends IOApp with KafkaComponents with Codecs {
       .use { stateStore =>
         val handler     = LobbyHandler(stateStore)
         val eventStream = subscribe(kafkaConfiguration.topics.commands, processRecord(handler))
-        publish("res-topic", eventStream)
+        publish(kafkaConfiguration.topics.gameEvents, eventStream)
       }
       .as(ExitCode.Success)
 

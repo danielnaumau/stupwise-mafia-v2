@@ -18,7 +18,7 @@ final case class LobbyHandler[F[_]: FlatMap: GenUUID](stateStore: StateStore[F, 
 
     case JoinRoom(_, roomId, player) =>
       for {
-        newState <- stateStore.updateState(s"state-lobby-$roomId-*")(_.addPlayer(player))
+        newState <- stateStore.updateState(s"state-lobby-$roomId-*")(_.addPlayer(player)) // toDo: Check unique userName and id
         eventId  <- GenUUID.generate[F]
         event     = newState
           .map(res => PlayerJoined(eventId, roomId, res.players))

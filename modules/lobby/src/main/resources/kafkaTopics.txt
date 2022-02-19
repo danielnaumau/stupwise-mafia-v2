@@ -1,2 +1,2 @@
 {"id":"643d9276-2cbe-46ad-877b-489b23e6506a","player":{"id":"643d9275-2cbe-46ad-877b-454b23e6506a","userName":"firstPlayer"},"type":"InitRoom"}
-{"id":"643d9275-2cbe-46ad-877b-454b23e6506a","player":{"id":"65744889-2cbe-46ad-877b-454b23e6506a","userName":"secondPlayer"},"type":"JoinRoom"}
+{"id":"643d9275-2cbe-46ad-877b-454b23e6506a","player":{"id":"65744889-2cbe-46ad-877b-455b23e8906a","userName":"secondPlayer"}, "roomId": "B7DPNG5", "type":"JoinRoom"}
