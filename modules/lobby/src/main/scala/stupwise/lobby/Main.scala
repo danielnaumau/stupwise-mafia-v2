@@ -3,6 +3,7 @@ package stupwise.lobby
 import cats.effect.{ExitCode, IO, IOApp}
 import dev.profunktor.redis4cats.Redis
 import dev.profunktor.redis4cats.effect.Log.NoOp.instance
+import stupwise.common.GenUUIDInstances._
 import fs2.kafka.ConsumerRecord
 import stupwise.common.Codecs
 import stupwise.common.kafka.KafkaComponents
@@ -18,7 +19,7 @@ object Main extends IOApp with KafkaComponents with Codecs {
       .use { stateStore =>
         val handler     = LobbyHandler(stateStore)
         val eventStream = subscribe(kafkaConfiguration.topics.commands, processRecord(handler))
-        publish("res-topic", eventStream)
+        publish(kafkaConfiguration.topics.gameEvents, eventStream)
       }
       .as(ExitCode.Success)
 

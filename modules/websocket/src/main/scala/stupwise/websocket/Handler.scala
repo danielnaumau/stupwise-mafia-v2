@@ -8,6 +8,7 @@ import io.circe.{Decoder, Encoder}
 import org.http4s.websocket.WebSocketFrame
 import org.http4s.websocket.WebSocketFrame.{Close, Text}
 import org.typelevel.log4cats.Logger
+import stupwise.common.GenUUID
 import stupwise.common.models.KafkaMsg
 import stupwise.common.models.KafkaMsg.CustomError
 import stupwise.websocket.Protocol.{InMessage, OutMessage}

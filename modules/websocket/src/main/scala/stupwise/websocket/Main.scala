@@ -5,7 +5,7 @@ import fs2.concurrent.Topic
 import org.http4s.server.websocket.WebSocketBuilder2
 import stupwise.common.kafka.{KafkaComponents, LogComponents}
 import stupwise.common.models.KafkaMsg
-import stupwise.websocket.GenUUIDInstances._
+import stupwise.common.GenUUIDInstances._
 import stupwise.websocket.Protocol.OutMessage
 
 object Main extends IOApp with KafkaComponents with WSCodecs with LogComponents {
