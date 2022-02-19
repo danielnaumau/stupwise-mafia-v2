@@ -20,7 +20,9 @@ val commonSettings = List(
     Libraries.circeExtras,
     Libraries.http4sDsl,
     Libraries.http4sServer,
-    Libraries.pureConfig
+    Libraries.pureConfig,
+    Libraries.logback,
+    Libraries.slf4jCats
   )
 )
 
