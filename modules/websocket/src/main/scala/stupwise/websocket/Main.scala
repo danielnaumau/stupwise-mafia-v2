@@ -3,12 +3,12 @@ package stupwise.websocket
 import cats.effect.{ExitCode, IO, IOApp}
 import fs2.concurrent.Topic
 import org.http4s.server.websocket.WebSocketBuilder2
-import stupwise.common.kafka.KafkaComponents
+import stupwise.common.kafka.{KafkaComponents, LogComponents}
 import stupwise.common.models.KafkaMsg
 import stupwise.websocket.GenUUIDInstances._
 import stupwise.websocket.Protocol.OutMessage
 
-object Main extends IOApp with KafkaComponents with WSCodecs {
+object Main extends IOApp with KafkaComponents with WSCodecs with LogComponents {
 
   def run(args: List[String]): IO[ExitCode] =
     (for {
