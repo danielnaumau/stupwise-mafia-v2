@@ -8,6 +8,7 @@ import org.http4s.HttpRoutes
 import org.http4s.dsl.Http4sDsl
 import org.http4s.server.websocket.WebSocketBuilder2
 import org.typelevel.log4cats.Logger
+import stupwise.common.GenUUID
 import stupwise.common.models.KafkaMsg
 import stupwise.websocket.Protocol.{InMessage, OutMessage}
 

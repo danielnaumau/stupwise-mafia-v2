@@ -1,22 +1,28 @@
 package stupwise.lobby
 
-import cats.Applicative
+import cats._
 import cats.implicits._
+import stupwise.common.GenUUID
 import stupwise.common.models.KafkaMsg._
 import stupwise.common.models.State.RoomState
 
-final case class LobbyHandler[F[_]: Applicative](stateStore: StateStore[F, RoomState]) {
+final case class LobbyHandler[F[_]: FlatMap: GenUUID](stateStore: StateStore[F, RoomState]) {
   def handle(command: Command): F[Event] = command match {
-    case InitRoom(id, player)         =>
-      val state = RoomState.empty().copy(players = List(player))
-      stateStore
-        .set(state)
-        .map(res => if (res) RoomCreated(id, state.roomId, player) else CustomError(id, "Cannot create room"))
-    case JoinRoom(id, roomId, player) =>
-      stateStore
-        .updateState(s"state-lobby-$roomId-*")(state =>
-          state.copy(players = state.players :+ player, version = state.version + 1)
-        )
-        .map(_.map(resState => PlayerJoined(id, roomId, resState.players)).getOrElse(CustomError(id, "Cannot join room")))
+    case InitRoom(_, player)         =>
+      val state = RoomState.empty(List(player))
+      for {
+        res     <- stateStore.set(state)
+        eventId <- GenUUID.generate[F]
+        event    = if (res) RoomCreated(eventId, state.roomId, player) else CustomError(eventId, "Cannot create room")
+      } yield event
+
+    case JoinRoom(_, roomId, player) =>
+      for {
+        newState <- stateStore.updateState(s"state-lobby-$roomId-*")(_.addPlayer(player))
+        eventId  <- GenUUID.generate[F]
+        event     = newState
+          .map(res => PlayerJoined(eventId, roomId, res.players))
+          .getOrElse(CustomError(eventId, s"Player $player cannot join the room: $roomId"))
+      } yield event
   }
 }

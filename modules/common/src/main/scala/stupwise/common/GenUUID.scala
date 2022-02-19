@@ -1,4 +1,4 @@
-package stupwise.websocket
+package stupwise.common
 
 import cats.effect.IO
 import cats.implicits.catsSyntaxApplicativeId
@@ -10,7 +10,7 @@ trait GenUUID[F[_]] {
 }
 
 object GenUUIDInstances {
-  implicit val ioInstance = new GenUUID[IO] {
+  implicit val ioInstance: GenUUID[IO] = new GenUUID[IO] {
     override def generate: IO[UUID] =
       UUID.randomUUID().pure[IO]
   }

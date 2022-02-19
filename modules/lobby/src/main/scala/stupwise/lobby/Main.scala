@@ -3,6 +3,7 @@ package stupwise.lobby
 import cats.effect.{ExitCode, IO, IOApp}
 import dev.profunktor.redis4cats.Redis
 import dev.profunktor.redis4cats.effect.Log.NoOp.instance
+import stupwise.common.GenUUIDInstances._
 import fs2.kafka.ConsumerRecord
 import stupwise.common.Codecs
 import stupwise.common.kafka.KafkaComponents
