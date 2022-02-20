@@ -17,7 +17,7 @@ object GameEventsProcessor {
   class Live[F[_]: Applicative: Logger] extends GameEventsProcessor[F] {
     override def processRecord(record: ConsumerRecord[Unit, KafkaMsg]): F[List[OutMessage]] = {
       val messages = record.value match {
-        case command: KafkaMsg.Command => TestResultMsg(command.id, "no reaction") :: Nil
+        case command: KafkaMsg.LobbyCommand => TestResultMsg(command.id, "no reaction") :: Nil
         case event: KafkaMsg.Event     =>
           event match {
             case KafkaMsg.RoomCreated(_, roomId, player) => OutMessage.RoomCreated(roomId, player.id) :: Nil

@@ -2,12 +2,14 @@ package stupwise.lobby
 
 import cats._
 import cats.implicits._
+import org.typelevel.log4cats.Logger
 import stupwise.common.GenUUID
 import stupwise.common.models.KafkaMsg._
 import stupwise.common.models.State.RoomState
+import org.typelevel.log4cats.syntax._
 
-final case class LobbyHandler[F[_]: FlatMap: GenUUID](stateStore: StateStore[F, RoomState]) {
-  def handle(command: Command): F[Event] = command match {
+final case class LobbyHandler[F[_]: FlatMap: GenUUID: Logger](stateStore: StateStore[F, RoomState]) {
+  def handle(command: LobbyCommand): F[Event] = command match {
     case InitRoom(_, player)         =>
       val state = RoomState.empty(List(player))
       for {
@@ -18,7 +20,8 @@ final case class LobbyHandler[F[_]: FlatMap: GenUUID](stateStore: StateStore[F, 
 
     case JoinRoom(_, roomId, player) =>
       for {
-        newState <- stateStore.updateState(s"state-lobby-$roomId-*")(_.addPlayer(player)) // toDo: Check unique userName and id
+        newState <- stateStore.updateState(s"state-lobby-$roomId-*")(_.addPlayer(player))
+        _        <- warn"Player $player cannot join the room: $roomId"
         eventId  <- GenUUID.generate[F]
         event     = newState
           .map(res => PlayerJoined(eventId, roomId, res.players))

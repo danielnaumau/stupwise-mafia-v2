@@ -20,10 +20,10 @@ final class StateStore[F[_]: Monad, S <: State: Decoder: Encoder](redis: RedisCo
     } yield result
 
   // toDo: make it tailrec
-  def updateState(keyPattern: String)(f: S => S): F[Option[S]] = {
+  def updateState(keyPattern: String)(f: S => Option[S]): F[Option[S]] = {
     val saved = for {
       latestState <- latest(keyPattern)
-      newState     = latestState.map(f)
+      newState     = latestState.flatMap(f)
       res         <- newState.traverse(set).map(_.getOrElse(false))
     } yield (res, newState)
 
