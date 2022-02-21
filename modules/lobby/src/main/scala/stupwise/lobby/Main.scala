@@ -2,15 +2,15 @@ package stupwise.lobby
 
 import cats.effect.{ExitCode, IO, IOApp}
 import dev.profunktor.redis4cats.Redis
-import dev.profunktor.redis4cats.effect.Log.NoOp.instance
+import dev.profunktor.redis4cats.effect.Log.NoOp._
 import stupwise.common.GenUUIDInstances._
 import fs2.kafka.ConsumerRecord
 import stupwise.common.Codecs
-import stupwise.common.kafka.KafkaComponents
-import stupwise.common.models.KafkaMsg.{Command, Event}
+import stupwise.common.kafka.{KafkaComponents, LogComponents}
+import stupwise.common.models.KafkaMsg.{LobbyCommand, Event}
 import stupwise.common.models.State.RoomState
 
-object Main extends IOApp with KafkaComponents with Codecs {
+object Main extends IOApp with KafkaComponents with Codecs with LogComponents {
 
   override def run(args: List[String]): IO[ExitCode] =
     Redis[IO]
@@ -23,7 +23,7 @@ object Main extends IOApp with KafkaComponents with Codecs {
       }
       .as(ExitCode.Success)
 
-  def processRecord(handler: LobbyHandler[IO])(record: ConsumerRecord[Unit, Command]): IO[Event] =
+  def processRecord(handler: LobbyHandler[IO])(record: ConsumerRecord[Unit, LobbyCommand]): IO[Event] =
     handler.handle(record.value)
 
 }

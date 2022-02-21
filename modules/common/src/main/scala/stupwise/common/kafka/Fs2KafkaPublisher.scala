@@ -1,7 +1,6 @@
 package stupwise.common.kafka
 
-import cats.effect.{Async, Concurrent, ExitCode}
-import cats.implicits.toFunctorOps
+import cats.effect.{Async, Concurrent}
 import fs2.kafka._
 import io.circe.Encoder
 import stupwise.common.Codecs
@@ -22,7 +21,7 @@ object Fs2KafkaPublisher {
 
     val stream = eventStream.through(oneToProducerRecordsPipe(topic)).through(KafkaProducer.pipe(settings))
 
-    stream.compile.drain.as(ExitCode.Success)
+    stream.compile.drain
   }
 
   private def oneToProducerRecordsPipe[F[_], K, V](topic: String) =

@@ -7,7 +7,7 @@ import io.circe._
 import io.circe.generic.extras.Configuration
 import io.circe.generic.extras.semiauto.{deriveConfiguredCodec, deriveConfiguredDecoder, deriveConfiguredEncoder}
 import io.circe.syntax._
-import stupwise.common.models.KafkaMsg.{Command, Event}
+import stupwise.common.models.KafkaMsg.{Event, LobbyCommand}
 import stupwise.common.models.State.RoomState
 import stupwise.common.models.{KafkaMsg, Player, State}
 
@@ -16,7 +16,7 @@ import java.nio.charset.StandardCharsets
 trait Codecs {
   implicit val withDiscriminatorConfig: Configuration = Configuration.default.withDiscriminator("type")
 
-  implicit val commandCodec: Codec[Command]       = deriveConfiguredCodec
+  implicit val commandCodec: Codec[LobbyCommand]  = deriveConfiguredCodec
   implicit val playerCodec: Codec[Player]         = deriveConfiguredCodec
   implicit val eventEncoder: Encoder[Event]       = deriveConfiguredEncoder
   implicit val eventDecoder: Decoder[Event]       = deriveConfiguredDecoder

@@ -7,9 +7,13 @@ sealed trait KafkaMsg {
 }
 
 object KafkaMsg {
-  sealed trait Command                                                extends KafkaMsg
-  final case class InitRoom(id: UUID, player: Player)                 extends Command
-  final case class JoinRoom(id: UUID, roomId: String, player: Player) extends Command
+  sealed trait LobbyCommand                                           extends KafkaMsg
+  final case class InitRoom(id: UUID, player: Player)                 extends LobbyCommand
+  final case class JoinRoom(id: UUID, roomId: String, player: Player) extends LobbyCommand
+  //final case class StartGame(id: UUID, roomId: String)                extends LobbyCommand
+
+  sealed trait MafiaEvent                                   extends KafkaMsg
+  final case class StartMafiaGame(id: UUID, roomId: String) extends MafiaEvent
 
   sealed trait Event                                                             extends KafkaMsg
   final case class RoomCreated(id: UUID, roomId: String, player: Player)         extends Event
