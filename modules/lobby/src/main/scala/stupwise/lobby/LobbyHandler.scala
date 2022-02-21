@@ -8,7 +8,7 @@ import stupwise.common.models.KafkaMsg._
 import stupwise.common.models.State.RoomState
 import org.typelevel.log4cats.syntax._
 
-final case class LobbyHandler[F[_]: FlatMap: GenUUID: Logger](stateStore: StateStore[F, RoomState]) {
+final case class LobbyHandler[F[_]: Monad: GenUUID: Logger](stateStore: StateStore[F, RoomState]) {
   def handle(command: LobbyCommand): F[Event] = command match {
     case InitRoom(_, player)         =>
       val state = RoomState.empty(List(player))
@@ -21,7 +21,7 @@ final case class LobbyHandler[F[_]: FlatMap: GenUUID: Logger](stateStore: StateS
     case JoinRoom(_, roomId, player) =>
       for {
         newState <- stateStore.updateState(s"state-lobby-$roomId-*")(_.addPlayer(player))
-        _        <- warn"Player $player cannot join the room: $roomId"
+        _        <- newState.fold(warn"Player $player cannot join the room: $roomId")(_ => ().pure[F])
         eventId  <- GenUUID.generate[F]
         event     = newState
           .map(res => PlayerJoined(eventId, roomId, res.players))

@@ -14,7 +14,7 @@ object State {
     override def keyPattern: String = s"state-lobby-$roomId-*"
 
     def addPlayer(newPlayer: Player): Option[RoomState] =
-      Option.when(players.exists(player => newPlayer.userName == player.userName || newPlayer.id == player.id))(
+      Option.when(!players.exists(player => newPlayer.userName == player.userName || newPlayer.id == player.id))(
         this.copy(players = players :+ newPlayer, version = version + 1)
       )
   }
