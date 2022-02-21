@@ -8,8 +8,6 @@
     <logger name="org.http4s" level="INFO"/>
     <logger name="org.apache" level="OFF"/>
     <logger name="fs2.kafka" level="OFF"/>
-    <logger name="fs2.kafka" level="OFF"/>
-
 
     <root level="debug">
         <appender-ref ref="STDOUT"/>
