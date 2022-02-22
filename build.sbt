@@ -3,6 +3,11 @@ import Dependencies.Libraries
 ThisBuild / version := git.gitHeadCommit.value.getOrElse("0.1").take(7)
 ThisBuild / scalaVersion := "2.13.8"
 
+ThisBuild / organization := "stupwise"
+ThisBuild / organizationName := "stupwise"
+
+ThisBuild / publishTo := Some(Resolver.file("file", new File("/tmp/my/artifactory")))
+
 ThisBuild / scalacOptions ++= Seq(
   "-feature",
   "-unchecked",
@@ -10,11 +15,10 @@ ThisBuild / scalacOptions ++= Seq(
   "-language:higherKinds",
   "-Ywarn-unused:imports,locals"
 )
-ThisBuild / packageDoc / publishArtifact := false
 
 def dockerSettings(name: String) = List(
   Docker / packageName := s"mafia-$name",
-  dockerRepository     := Some("registry.digitalocean.com/stupwise")
+  dockerRepository := Some("registry.digitalocean.com/stupwise")
 )
 
 lazy val `kind-projector` = "org.typelevel" % "kind-projector" % "0.13.2" cross CrossVersion.full
@@ -39,7 +43,7 @@ val commonSettings = List(
 lazy val common = (project in file("modules/common"))
   .settings(commonSettings: _*)
   .settings(
-    addCompilerPlugin(`kind-projector`),
+    addCompilerPlugin(`kind-projector`)
   )
 
 lazy val websocket = (project in file("modules/websocket"))
@@ -52,9 +56,8 @@ lazy val lobby = (project in file("modules/lobby"))
   .enablePlugins(JavaAppPackaging)
   .settings(dockerSettings("lobby"))
 
-
 lazy val root = (project in file("."))
   .settings(
     name := "stupwise-mafia-app"
   )
-  .aggregate(websocket, lobby, common)
+  .aggregate(websocket, lobby)
