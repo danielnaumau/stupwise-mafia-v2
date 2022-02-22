@@ -21,19 +21,19 @@ trait Codecs {
   implicit val eventEncoder: Encoder[Event]       = deriveConfiguredEncoder
   implicit val eventDecoder: Decoder[Event]       = deriveConfiguredDecoder
   implicit val kafkaMsgCodec: Codec[KafkaMsg]     = deriveConfiguredCodec
-  implicit val roomStateDecoder: Codec[RoomState] = deriveConfiguredCodec
-  implicit val stateDecoder: Codec[State]         = deriveConfiguredCodec
+  implicit val stateCodec: Codec[State]         = deriveConfiguredCodec
+  implicit val roomStateCodec: Codec[RoomState] = deriveConfiguredCodec
 }
 
 object Codecs {
 
   private val printer = Printer.noSpaces.copy(dropNullValues = true)
 
-  implicit def circeSerializer[F[_]: Sync, A: Encoder] = Serializer.lift[F, A] { a =>
+  implicit def circeSerializer[F[_]: Sync, A: Encoder]: Serializer[F, A] = Serializer.lift[F, A] { a =>
     printer.print(a.asJson).getBytes(StandardCharsets.UTF_8).pure[F]
   }
 
-  implicit def circeDeserializer[F[_]: Sync, A: Decoder] = Deserializer.lift[F, A] { bytes =>
+  implicit def circeDeserializer[F[_]: Sync, A: Decoder]: Deserializer[F, A] = Deserializer.lift[F, A] { bytes =>
     parser.decode[A](new String(bytes, StandardCharsets.UTF_8)).liftTo[F]
   }
 

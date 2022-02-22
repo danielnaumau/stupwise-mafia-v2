@@ -7,8 +7,9 @@ import stupwise.common.GenUUIDInstances._
 import fs2.kafka.ConsumerRecord
 import stupwise.common.Codecs
 import stupwise.common.kafka.{KafkaComponents, LogComponents}
-import stupwise.common.models.KafkaMsg.{LobbyCommand, Event}
+import stupwise.common.models.KafkaMsg.{Event, LobbyCommand}
 import stupwise.common.models.State.RoomState
+import stupwise.common.models.StateStore
 
 object Main extends IOApp with KafkaComponents with Codecs with LogComponents {
 
