@@ -18,7 +18,7 @@ ThisBuild / scalacOptions ++= Seq(
 
 def dockerSettings(name: String) = List(
   Docker / packageName := s"mafia-$name",
-  dockerRepository := Some("registry.digitalocean.com/stupwise")
+  Docker / dockerRepository := Some("registry.digitalocean.com/stupwise")
 )
 
 lazy val `kind-projector` = "org.typelevel" % "kind-projector" % "0.13.2" cross CrossVersion.full
@@ -36,8 +36,7 @@ val commonSettings = List(
     Libraries.fs2Kafka,
     Libraries.catsEffect,
     Libraries.redis4catsEffects
-  ),
-  publishArtifact := false
+  )
 )
 
 lazy val common = (project in file("modules/common"))
@@ -60,4 +59,4 @@ lazy val root = (project in file("."))
   .settings(
     name := "stupwise-mafia-app"
   )
-  .aggregate(websocket, lobby)
+  .aggregate(websocket, lobby, common)

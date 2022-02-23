@@ -1,14 +1,8 @@
 package stupwise.common.kafka
 
-import com.typesafe.config.Config
-import pureconfig.{ConfigReader, ConfigSource}
+import stupwise.common.AppConfig
+import stupwise.common.AppConfig.KafkaConfig
 
-trait Fs2KafkaComponent[KafkaTopicSettings] {
-
-  implicit val kafkaTopicSettingsReader: ConfigReader[KafkaTopicSettings]
-
-  def config: Config
-
-  lazy val kafkaConfiguration =
-    ConfigSource.fromConfig(config).at("kafka").loadOrThrow[KafkaConfiguration[KafkaTopicSettings]]
+trait Fs2KafkaComponent {
+  val kafkaConfig: KafkaConfig = AppConfig.load.kafka
 }

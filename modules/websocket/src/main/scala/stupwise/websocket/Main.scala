@@ -14,9 +14,9 @@ object Main extends IOApp with KafkaComponents with WSCodecs with LogComponents 
     (for {
       topic              <- fs2.Stream.eval(Topic[IO, OutMessage])
       gameEventsProcessor = new GameEventsProcessor.Live[IO]
-      eventConsumer       = subscribe(kafkaConfiguration.topics.gameEvents, gameEventsProcessor.processRecord)
+      eventConsumer       = subscribe(kafkaConfig.topics.gameEvents, gameEventsProcessor.processRecord)
       outPublisher        = eventConsumer.flatMap(fs2.Stream.emits).through(topic.publish)
-      kafkaPublish        = (stream: fs2.Stream[IO, KafkaMsg]) => publish(kafkaConfiguration.topics.commands, stream)
+      kafkaPublish        = (stream: fs2.Stream[IO, KafkaMsg]) => publish(kafkaConfig.topics.commands, stream)
       websocket           = HttpServer
                               .makeWebsocket(
                                 (wb: WebSocketBuilder2[IO]) => new WebsocketRoutes(topic, kafkaPublish, wb).routes,

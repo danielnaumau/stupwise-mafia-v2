@@ -7,7 +7,7 @@ import stupwise.common.GenUUID
 import stupwise.common.models.KafkaMsg._
 import org.typelevel.log4cats.syntax._
 import stupwise.common.models.State.RoomState
-import stupwise.common.models.StateStore
+import stupwise.common.redis.StateStore
 
 final case class LobbyHandler[F[_]: Monad: GenUUID: Logger](stateStore: StateStore[F, RoomState]) {
   def handle(command: LobbyCommand): F[Event] = command match {

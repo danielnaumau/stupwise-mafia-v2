@@ -3,6 +3,7 @@ package stupwise.common.kafka
 import cats.effect.{Async, Concurrent}
 import fs2.kafka._
 import io.circe.Encoder
+import stupwise.common.AppConfig.KafkaConfig.KafkaSettings
 import stupwise.common.Codecs
 
 object Fs2KafkaPublisher {
