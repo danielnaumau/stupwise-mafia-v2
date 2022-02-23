@@ -42,10 +42,10 @@ services:
       - app
 
   mafia-lobby:
-    image: registry.digitalocean.com/stupwise/mafia-lobby:9d06687
+    image: registry.digitalocean.com/stupwise/mafia-lobby:d3da1be
     environment:
-      - REDIS_URI=1
-      - KAFKA_CFG_LISTENERS=PLAINTEXT://:9092
+      - REDIS_URI=redis://redis:6379
+      - KAFKA_BROKERS=kafka://kafka:9092
     depends_on:
       - redis
       - kafka
@@ -53,10 +53,13 @@ services:
       - app
 
   mafia-websocket:
-    image: registry.digitalocean.com/stupwise/mafia-websocket:9d06687
+    image: registry.digitalocean.com/stupwise/mafia-websocket:d3da1be
+    environment:
+      - KAFKA_BROKERS=kafka://kafka:9092
     ports:
       - "8080:8080"
     depends_on:
       - kafka
+      - mafia-lobby
     networks:
       - app
