@@ -1,8 +1,4 @@
-<<<<<<< HEAD:modules/common/src/main/scala/stupwise/common/redis/StateStore.scala
 package stupwise.common.redis
-=======
-package stupwise.common
->>>>>>> 4cb230b (Add game models):modules/common/src/main/scala/stupwise/common/StateStore.scala
 
 import cats._
 import cats.syntax.all._

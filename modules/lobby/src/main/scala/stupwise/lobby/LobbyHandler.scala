@@ -4,10 +4,11 @@ import cats._
 import cats.implicits._
 import org.typelevel.log4cats.Logger
 import org.typelevel.log4cats.syntax._
+import stupwise.common.GenUUID
 import stupwise.common.models.KafkaMsg._
 import stupwise.common.models.State.RoomState
 import stupwise.common.models.{KafkaMsg, MsgId, RoomStatus}
-import stupwise.common.{GenUUID, StateStore}
+import stupwise.common.redis.StateStore
 
 final case class LobbyHandler[F[_]: Monad: GenUUID: Logger](stateStore: StateStore[F, RoomState]) {
   def handle(command: LobbyCommand): F[KafkaMsg] = command match {
