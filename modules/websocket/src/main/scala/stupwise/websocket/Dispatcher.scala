@@ -21,6 +21,6 @@ object Dispatcher {
         GenUUID.generate.map(JoinRoom(_, roomId, Player(playerId, userName))).map(_ :: Nil)
     }
 
-    debug"Receive message from WS: $msg" *> mappedMsg
+    debug"Receive message from WS: $msg, playerId: $playerId" *> mappedMsg
   }
 }

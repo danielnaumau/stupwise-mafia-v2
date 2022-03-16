@@ -1,11 +1,16 @@
 version: '3.6'
 
+networks:
+  app: {}
+
 services:
   redis:
     restart: always
     image: redis:6.0.8
     ports:
       - 6379:6379
+    networks:
+      - app
     healthcheck:
       test: ["CMD", "redis-cli", "ping"]
       interval: 1s
@@ -18,6 +23,8 @@ services:
       - "2181:2181"
     environment:
       - ALLOW_ANONYMOUS_LOGIN=yes
+    networks:
+      - app
 
   kafka:
     image: bitnami/kafka:2.8.0
@@ -31,3 +38,28 @@ services:
       - ALLOW_PLAINTEXT_LISTENER=yes
     depends_on:
       - zookeeper
+    networks:
+      - app
+
+  mafia-lobby:
+    image: registry.digitalocean.com/stupwise/mafia-lobby:d3da1be
+    environment:
+      - REDIS_URI=redis://redis:6379
+      - KAFKA_BROKERS=kafka://kafka:9092
+    depends_on:
+      - redis
+      - kafka
+    networks:
+      - app
+
+  mafia-websocket:
+    image: registry.digitalocean.com/stupwise/mafia-websocket:d3da1be
+    environment:
+      - KAFKA_BROKERS=kafka://kafka:9092
+    ports:
+      - "8080:8080"
+    depends_on:
+      - kafka
+      - mafia-lobby
+    networks:
+      - app

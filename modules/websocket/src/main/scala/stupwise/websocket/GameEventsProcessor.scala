@@ -17,14 +17,14 @@ trait GameEventsProcessor[F[_]] {
 object GameEventsProcessor {
   class Live[F[_]: Applicative: Logger] extends GameEventsProcessor[F] {
     override def processRecord(record: ConsumerRecord[Unit, Event]): F[List[OutMessage]] = {
-      val messages = record.value match {
+      val messages: List[OutMessage] = record.value match {
         case KafkaMsg.RoomCreated(_, roomId, player)   => RoomCreated(roomId, player.id) :: Nil
         case KafkaMsg.PlayerJoined(_, roomId, players) =>
           players.map(player => PlayerJoined(roomId, player.id, players))
         case KafkaMsg.CustomError(id, msg)             => DecodingError(id, msg) :: Nil
       }
 
-      debug"Receive event from kafka: ${record.value}" *> messages.pure[F].asInstanceOf[F[List[OutMessage]]]
+      debug"Receive event from kafka: ${record.value}" *> messages.pure[F]
     }
   }
 }

@@ -1,12 +1,12 @@
-package stupwise.lobby
+package stupwise.common.redis
 
 import cats._
 import cats.syntax.all._
 import dev.profunktor.redis4cats.RedisCommands
-import io.circe.{Decoder, Encoder}
 import io.circe.parser.{decode => jsonDecode}
-import stupwise.common.models.State
 import io.circe.syntax.EncoderOps
+import io.circe.{Decoder, Encoder}
+import stupwise.common.models.State
 
 final class StateStore[F[_]: Monad, S <: State: Decoder: Encoder](redis: RedisCommands[F, String, String]) {
   def set(state: S): F[Boolean] =
