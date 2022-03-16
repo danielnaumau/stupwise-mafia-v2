@@ -1,5 +1,7 @@
 package stupwise.common.models
 
-import java.util.UUID
+import stupwise.common.models.game.{Role, Roles}
 
-final case class Player(id: UUID, userName: String)
+final case class LobbyPlayer(id: PlayerId, userName: String)
+
+final case class Player(id: PlayerId, role: Role = Roles.Unknown)

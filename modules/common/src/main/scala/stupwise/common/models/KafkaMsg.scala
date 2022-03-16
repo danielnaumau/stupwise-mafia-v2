@@ -1,22 +1,24 @@
 package stupwise.common.models
 
-import java.util.UUID
+import stupwise.common.models.game.GameVariant
 
 sealed trait KafkaMsg {
-  def id: UUID
+  def id: MsgId
 }
 
 object KafkaMsg {
-  sealed trait LobbyCommand                                           extends KafkaMsg
-  final case class InitRoom(id: UUID, player: Player)                 extends LobbyCommand
-  final case class JoinRoom(id: UUID, roomId: String, player: Player) extends LobbyCommand
-  //final case class StartGame(id: UUID, roomId: String)                extends LobbyCommand
+  sealed trait LobbyCommand                                                  extends KafkaMsg
+  final case class InitRoom(id: MsgId, player: LobbyPlayer)                  extends LobbyCommand
+  final case class JoinRoom(id: MsgId, roomId: RoomId, player: LobbyPlayer)  extends LobbyCommand
+  final case class InitGame(id: MsgId, roomId: RoomId, variant: GameVariant) extends LobbyCommand
 
-  sealed trait MafiaEvent                                   extends KafkaMsg
-  final case class StartMafiaGame(id: UUID, roomId: String) extends MafiaEvent
+  sealed trait GameCommand extends KafkaMsg
+  final case class CreateGame(id: MsgId, roomId: RoomId, variant: GameVariant, players: List[PlayerId])
+      extends GameCommand
 
-  sealed trait Event                                                             extends KafkaMsg
-  final case class RoomCreated(id: UUID, roomId: String, player: Player)         extends Event
-  final case class PlayerJoined(id: UUID, roomId: String, players: List[Player]) extends Event
-  final case class CustomError(id: UUID, msg: String)                            extends Event
+  sealed trait Event                                                                                   extends KafkaMsg
+  final case class RoomCreated(id: MsgId, roomId: RoomId, player: LobbyPlayer)                         extends Event
+  final case class PlayerJoined(id: MsgId, roomId: RoomId, players: List[LobbyPlayer])                 extends Event
+  final case class GameCreated(id: MsgId, roomId: RoomId, players: List[Player], variant: GameVariant) extends Event
+  final case class CustomError(id: MsgId, msg: String)                                                 extends Event
 }
