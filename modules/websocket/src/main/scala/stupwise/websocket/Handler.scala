@@ -9,8 +9,8 @@ import org.http4s.websocket.WebSocketFrame
 import org.http4s.websocket.WebSocketFrame.{Close, Text}
 import org.typelevel.log4cats.Logger
 import stupwise.common.GenUUID
-import stupwise.common.models.KafkaMsg
 import stupwise.common.models.KafkaMsg.CustomError
+import stupwise.common.models.{KafkaMsg, MsgId}
 import stupwise.websocket.Protocol.{InMessage, OutMessage}
 
 trait Handler[F[_]] {
@@ -28,19 +28,21 @@ object Handler {
         def send: Stream[F, Text] =
           topic
             .subscribe(1000)
-            .filter(_.playerId == playerId)
+            .filter(_.playerId.value == playerId)
             .map(msg => Text(WSCodecs.encode(msg)))
 
         def decode(frame: WebSocketFrame): F[List[KafkaMsg]] = frame match {
-          case Close(_)     => List[KafkaMsg](CustomError(playerId, "socket closed")).pure[F]
+          case Close(_)     => GenUUID.generate.map(uuid => List[KafkaMsg](CustomError(MsgId(uuid), "socket closed")))
           case Text(msg, _) =>
             WSCodecs
               .decode(msg)
               .fold(
-                err => List[KafkaMsg](CustomError(playerId, err.getMessage)).pure[F],
+                err => GenUUID.generate.map(uuid => List[KafkaMsg](CustomError(MsgId(uuid), err.getMessage))),
                 msg => Dispatcher.dispatch[F](playerId, msg)
               )
-          case e            => List[KafkaMsg](CustomError(playerId, s" Unexpected WS message: $e")).pure[F]
+          case e            =>
+            GenUUID.generate
+              .map(uuid => List[KafkaMsg](CustomError(MsgId(uuid), s"Unexpected WS message: $e")))
         }
 
         def receive(wsfStream: Stream[F, WebSocketFrame]): Stream[F, Unit] =

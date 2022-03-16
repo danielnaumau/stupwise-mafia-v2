@@ -11,6 +11,8 @@ object Dependencies {
     val fs2Kafka   = "3.0.0-M4"
     val pureConfig = "0.17.1"
     val logback    = "1.2.10"
+    val newType    = "0.4.4"
+    val enumeratum = "1.7.0"
   }
 
   object Libraries {
@@ -25,6 +27,7 @@ object Dependencies {
     val http4sDsl    = http4s("dsl")
     val http4sServer = http4s("blaze-server")
 
+    val newType    = "io.estatico"           %% "newtype"    % V.newType
     val pureConfig = "com.github.pureconfig" %% "pureconfig" % V.pureConfig
 
     val redis4catsEffects = "dev.profunktor" %% "redis4cats-effects" % V.redis4cats
@@ -36,6 +39,9 @@ object Dependencies {
 
     val slf4jCats = "org.typelevel" %% "log4cats-slf4j"  % V.log4j
     val logback   = "ch.qos.logback" % "logback-classic" % V.logback
+
+    val enumeratum      = "com.beachape" %% "enumeratum"       % V.enumeratum
+    val enumeratumCirce = "com.beachape" %% "enumeratum-circe" % V.enumeratum
 
   }
 }
