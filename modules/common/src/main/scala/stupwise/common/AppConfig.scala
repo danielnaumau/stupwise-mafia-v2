@@ -1,9 +1,9 @@
 package stupwise.common
 
 import pureconfig.ConfigSource
-import stupwise.common.AppConfig.{KafkaConfig, RedisConfig}
-import stupwise.common.AppConfig.KafkaConfig.{KafkaSettings, KafkaTopics}
 import pureconfig.generic.auto._
+import stupwise.common.AppConfig.KafkaConfig.{KafkaSettings, KafkaTopics}
+import stupwise.common.AppConfig.{KafkaConfig, RedisConfig}
 
 final case class AppConfig(kafka: KafkaConfig, redis: RedisConfig)
 
@@ -12,7 +12,13 @@ object AppConfig {
 
   object KafkaConfig {
     final case class KafkaSettings(bootstrapServers: String, retries: Int)
-    final case class KafkaTopics(gameEvents: String, commands: String)
+    final case class KafkaTopics(
+      gameEvents: String,
+      gameCommands: String,
+      lobbyEvents: String,
+      lobbyCommands: String,
+      alerts: String
+    )
   }
 
   final case class RedisConfig(uri: String)

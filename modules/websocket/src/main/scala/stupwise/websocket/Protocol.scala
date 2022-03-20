@@ -2,7 +2,7 @@ package stupwise.websocket
 
 import stupwise.common.models.game.Role
 import stupwise.common.models.views.GameInfoView
-import stupwise.common.models.{LobbyPlayer, PlayerId, RoomId}
+import stupwise.common.models.{LobbyPlayer, PlayerId, Reason, RoomId}
 
 object Protocol {
   sealed trait OutMessage {
@@ -11,9 +11,10 @@ object Protocol {
 
   object OutMessage {
     final case class SocketClosed(playerId: PlayerId)                                                extends OutMessage
-    //final case class DecodingError(playerId: PlayerId, errorMsg: String)                             extends OutMessage
+    final case class Error(playerId: PlayerId, errorMsg: Reason)                                     extends OutMessage
     final case class RoomCreated(roomId: RoomId, playerId: PlayerId)                                 extends OutMessage
     final case class PlayerJoined(roomId: RoomId, playerId: PlayerId, players: List[LobbyPlayer])    extends OutMessage
+    final case class PlayerLeft(roomId: RoomId, playerId: PlayerId, players: List[LobbyPlayer])      extends OutMessage
     final case class GameStarted(roomId: RoomId, playerId: PlayerId, role: Role, info: GameInfoView) extends OutMessage
   }
 

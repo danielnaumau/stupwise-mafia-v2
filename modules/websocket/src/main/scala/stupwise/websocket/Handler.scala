@@ -9,8 +9,7 @@ import org.http4s.websocket.WebSocketFrame
 import org.http4s.websocket.WebSocketFrame.{Close, Text}
 import org.typelevel.log4cats.Logger
 import stupwise.common.GenUUID
-import stupwise.common.models.KafkaMsg.CustomError
-import stupwise.common.models.{KafkaMsg, MsgId}
+import stupwise.engine.Engine
 import stupwise.websocket.Protocol.{InMessage, OutMessage}
 
 trait Handler[F[_]] {
@@ -19,40 +18,30 @@ trait Handler[F[_]] {
 }
 
 object Handler {
-  def make[F[_]: GenUUID: Sync: Logger](
-    topic: Topic[F, OutMessage],
-    publish: fs2.Stream[F, KafkaMsg] => F[Unit]
-  )(implicit outEncoder: Encoder[OutMessage], inDecoder: Decoder[InMessage]): F[Handler[F]] = GenUUID[F].generate.map {
-    playerId =>
-      new Handler[F] {
-        def send: Stream[F, Text] =
-          topic
-            .subscribe(1000)
-            .filter(_.playerId.value == playerId)
-            .map(msg => Text(WSCodecs.encode(msg)))
+  def make[F[_]: GenUUID: Sync: Logger, In <: InMessage: Decoder, Out <: OutMessage: Encoder](
+    topic: Topic[F, Out],
+    engine: Engine[F],
+    dispatcher: Dispatcher[F]
+  ): F[Handler[F]] = GenUUID[F].generate.map { playerId =>
+    new Handler[F] {
+      def send: Stream[F, Text] =
+        topic
+          .subscribe(1000)
+          .filter(_.playerId.value == playerId)
+          .map(msg => Text(WSCodecs.encode(msg)))
 
-        def decode(frame: WebSocketFrame): F[List[KafkaMsg]] = frame match {
-          case Close(_)     => GenUUID.generate.map(uuid => List[KafkaMsg](CustomError(MsgId(uuid), "socket closed")))
-          case Text(msg, _) =>
-            WSCodecs
-              .decode(msg)
-              .fold(
-                err => GenUUID.generate.map(uuid => List[KafkaMsg](CustomError(MsgId(uuid), err.getMessage))),
-                msg => Dispatcher.dispatch[F](playerId, msg)
-              )
-          case e            =>
-            GenUUID.generate
-              .map(uuid => List[KafkaMsg](CustomError(MsgId(uuid), s"Unexpected WS message: $e")))
-        }
-
-        def receive(wsfStream: Stream[F, WebSocketFrame]): Stream[F, Unit] =
-          Stream.eval(
-            publish(
-              wsfStream
-                .evalMap(decode)
-                .flatMap(Stream.emits)
-            )
-          )
+      def process(frame: WebSocketFrame): F[Unit] = frame match {
+        case Close(_)     => engine.handleError("socket closed")
+        case Text(msg, _) =>
+          WSCodecs
+            .decode(msg)
+            .fold(e => engine.handleError(e.getMessage), msg => dispatcher.dispatch(playerId, msg))
+        case e            =>
+          engine.handleError(s"Unexpected WS message: $e")
       }
+
+      def receive(wsfStream: Stream[F, WebSocketFrame]): Stream[F, Unit] =
+        wsfStream.evalMap(process)
+    }
   }
 }

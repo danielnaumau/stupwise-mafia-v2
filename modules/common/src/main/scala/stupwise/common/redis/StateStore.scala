@@ -6,7 +6,7 @@ import dev.profunktor.redis4cats.RedisCommands
 import io.circe.parser.{decode => jsonDecode}
 import io.circe.syntax.EncoderOps
 import io.circe.{Decoder, Encoder}
-import stupwise.common.models.State
+import stupwise.common.models.{Reason, State}
 
 final class StateStore[F[_]: Monad, S <: State: Decoder: Encoder](redis: RedisCommands[F, String, String]) {
   def set(state: S): F[Boolean] =
@@ -20,10 +20,10 @@ final class StateStore[F[_]: Monad, S <: State: Decoder: Encoder](redis: RedisCo
     } yield result
 
   // toDo: make it tailrec
-  def updateState(keyPattern: String)(f: S => Option[S]): F[Option[S]] = {
+  def updateState(keyPattern: String)(f: S => Either[Reason, S]): F[Either[Reason, S]] = {
     val saved = for {
       latestState <- latest(keyPattern)
-      newState     = latestState.flatMap(f)
+      newState     = latestState.map(f).getOrElse(Left(Reason("Error")))
       res         <- newState.traverse(set).map(_.getOrElse(false))
     } yield (res, newState)
 

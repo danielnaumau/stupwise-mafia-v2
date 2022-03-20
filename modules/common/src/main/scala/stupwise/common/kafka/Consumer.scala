@@ -1,22 +1,25 @@
 package stupwise.common.kafka
 
 import cats.effect.{Async, Concurrent}
+import cats.implicits._
 import fs2.kafka._
 import io.circe.Decoder
 import stupwise.common.AppConfig.KafkaConfig.KafkaSettings
 import stupwise.common.Codecs
 
-object Fs2KafkaConsumer {
+trait Consumer[F[_], R] {
+  def receive(): fs2.Stream[F, R]
+}
 
-  def consume[F[_]: Concurrent: Async, V: Decoder, R](
+object Consumer {
+  def kafka[F[_]: Concurrent: Async, R: Decoder](
     kafkaSettings: KafkaSettings,
-    processRecord: ConsumerRecord[Unit, V] => F[R],
     topic: String
-  ): fs2.Stream[F, R] = {
+  ): fs2.Stream[F, Consumer[F, R]] = {
     val settings =
-      ConsumerSettings[F, Unit, V](
+      ConsumerSettings[F, Unit, R](
         keyDeserializer = Deserializer.unit,
-        valueDeserializer = Codecs.circeDeserializer[F, V]
+        valueDeserializer = Codecs.circeDeserializer[F, R]
       )
         .withBootstrapServers(kafkaSettings.bootstrapServers)
         .withAutoOffsetReset(AutoOffsetReset.Latest)
@@ -25,12 +28,6 @@ object Fs2KafkaConsumer {
     KafkaConsumer
       .stream(settings)
       .subscribeTo(topic)
-      .partitionedRecords
-      .map { partitionStream =>
-        partitionStream.evalMap { committable =>
-          processRecord(committable.record)
-        }
-      }
-      .parJoinUnbounded
+      .map(c => () => c.stream.evalMap(c => c.offset.commit.as(c.record.value)))
   }
 }

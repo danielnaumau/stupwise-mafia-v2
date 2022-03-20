@@ -15,9 +15,9 @@ trait WSCodecs extends Codecs {
 }
 
 object WSCodecs {
-  def decode(json: String)(implicit d: Decoder[InMessage]): Either[Error, InMessage] =
-    jawn.decode[InMessage](json)
+  def decode[In](json: String)(implicit d: Decoder[In]): Either[Error, In] =
+    jawn.decode[In](json)
 
-  def encode(outcomeMessage: OutMessage)(implicit e: Encoder[OutMessage]): String =
+  def encode[Out](outcomeMessage: Out)(implicit e: Encoder[Out]): String =
     outcomeMessage.asJson.noSpaces
 }

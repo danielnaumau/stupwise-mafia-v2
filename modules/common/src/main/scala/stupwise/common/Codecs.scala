@@ -7,7 +7,7 @@ import io.circe._
 import io.circe.generic.extras.Configuration
 import io.circe.generic.extras.semiauto.deriveConfiguredCodec
 import io.circe.syntax._
-import stupwise.common.models.KafkaMsg.{Event, GameCommand, LobbyCommand}
+import stupwise.common.models.KafkaMsg._
 import stupwise.common.models.State.{GameState, RoomState}
 import stupwise.common.models._
 import stupwise.common.models.game.Target.PlayerTarget
@@ -32,8 +32,10 @@ trait Codecs {
 
   // msg traits
   implicit val gameCommandCodec: Codec[GameCommand]   = deriveConfiguredCodec
+  implicit val gameEventCodec: Codec[GameEvent]       = deriveConfiguredCodec
   implicit val lobbyCommandCodec: Codec[LobbyCommand] = deriveConfiguredCodec
-  implicit val eventCodec: Codec[Event]               = deriveConfiguredCodec
+  implicit val lobbyEventCodec: Codec[LobbyEvent]     = deriveConfiguredCodec
+  implicit val alertCodec: Codec[Alert]               = deriveConfiguredCodec
   implicit val kafkaMsgCodec: Codec[KafkaMsg]         = deriveConfiguredCodec
 }
 

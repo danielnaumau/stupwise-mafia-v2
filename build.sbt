@@ -53,7 +53,7 @@ lazy val common = (project in file("modules/common"))
   )
 
 lazy val websocket = (project in file("modules/websocket"))
-  .dependsOn(gameCore)
+  .dependsOn(engine)
   .enablePlugins(JavaAppPackaging)
   .settings(dockerSettings("websocket"))
 
@@ -72,8 +72,13 @@ lazy val classicMafia = (project in file("modules/classic-mafia"))
   .enablePlugins(JavaAppPackaging)
   .settings(dockerSettings("classicMafia"))
 
+lazy val engine = (project in file("modules/engine"))
+  .dependsOn(common)
+  .enablePlugins(JavaAppPackaging)
+  .settings(dockerSettings("engine"))
+
 lazy val root = (project in file("."))
   .settings(
     name := "stupwise-mafia-app"
   )
-  .aggregate(websocket, lobby, common, gameCore, classicMafia)
+  .aggregate(websocket, lobby, common, gameCore, classicMafia, engine)
