@@ -3,6 +3,7 @@ package stupwise.common
 import cats.Eq
 import io.circe.{Decoder, Encoder}
 import io.estatico.newtype.macros.newtype
+import stupwise.common.models.RoomId
 import stupwise.common.models.game.{GamePhase, Role}
 
 import java.util.UUID
@@ -30,6 +31,15 @@ package object models {
     implicit val decoder: Decoder[RoomId] = deriving
     implicit val encoder: Encoder[RoomId] = deriving
     implicit val roomIdEq: Eq[RoomId]     = Eq.fromUniversalEquals
+  }
+
+  @newtype case class Reason(value: String)
+
+  object Reason {
+    def apply(errors: List[String]): Reason = Reason(errors.mkString(";"))
+
+    implicit val decoder: Decoder[Reason] = deriving
+    implicit val encoder: Encoder[Reason] = deriving
   }
 
   case class RoleOrder(priorities: Map[GamePhase, List[Role]])
