@@ -1,8 +1,8 @@
-package stupwise.classicmafia
+package stupwise.common.games
 
-import stupwise.common.models.game.Roles._
 import stupwise.common.models
 import stupwise.common.models.game.GamePhase.{Day, Night}
+import stupwise.common.models.game.Roles.{Civilian, Detective, Doctor, Mafia}
 import stupwise.common.models.game._
 import stupwise.common.models.{RoleKnowledge, RoleOrder}
 

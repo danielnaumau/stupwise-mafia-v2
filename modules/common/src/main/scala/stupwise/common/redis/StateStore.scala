@@ -24,15 +24,16 @@ final class StateStore[F[_]: Monad, S <: State: Decoder: Encoder](redis: RedisCo
     val saved = for {
       latestState <- latest(keyPattern)
       newState     = latestState.map(f).getOrElse(Left(Reason("Error")))
-      res         <- newState.traverse(set).map(_.getOrElse(false))
+      res         <- newState.traverse(set)
     } yield (res, newState)
 
     saved.flatMap { case (res, newState) =>
-      if (res) {
-        newState.pure[F]
-      } else {
-        updateState(keyPattern)(f)
+      val state: F[Either[Reason, S]] = res match {
+        case Left(value)           => Left(value).asInstanceOf[Either[Reason, S]].pure[F]
+        case Right(value) if value => newState.pure[F]
+        case _                     => updateState(keyPattern)(f)
       }
+      state
     }
   }
 }

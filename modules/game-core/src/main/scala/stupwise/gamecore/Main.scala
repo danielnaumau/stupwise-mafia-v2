@@ -16,9 +16,8 @@ object Main extends IOApp with Fs2KafkaComponent with Codecs with LogComponents 
       val processCommands = for {
         consumer <- Consumer.kafka[IO, GameCommand](kafkaConfig.settings, kafkaConfig.topics.gameCommands)
         producer <- Producer.kafka[IO, GameEvent](kafkaConfig.settings, kafkaConfig.topics.gameEvents)
-        receive  <- consumer.receive()
-        command   = handler.handle(receive)
-      } yield command.flatMap(producer.send)
+        receive  <- consumer.receive().evalMap(handler.handle).evalMap(producer.send)
+      } yield receive
       processCommands.compile.drain
     }
       .as(ExitCode.Success)

@@ -35,7 +35,6 @@ trait Codecs {
   implicit val gameEventCodec: Codec[GameEvent]       = deriveConfiguredCodec
   implicit val lobbyCommandCodec: Codec[LobbyCommand] = deriveConfiguredCodec
   implicit val lobbyEventCodec: Codec[LobbyEvent]     = deriveConfiguredCodec
-  implicit val alertCodec: Codec[Alert]               = deriveConfiguredCodec
   implicit val kafkaMsgCodec: Codec[KafkaMsg]         = deriveConfiguredCodec
 }
 
@@ -50,5 +49,4 @@ object Codecs {
   implicit def circeDeserializer[F[_]: Sync, A: Decoder] = Deserializer.lift[F, A] { bytes =>
     parser.decode[A](new String(bytes, StandardCharsets.UTF_8)).liftTo[F]
   }
-
 }

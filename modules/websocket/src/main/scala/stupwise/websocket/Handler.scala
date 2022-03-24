@@ -9,7 +9,7 @@ import org.http4s.websocket.WebSocketFrame
 import org.http4s.websocket.WebSocketFrame.{Close, Text}
 import org.typelevel.log4cats.Logger
 import stupwise.common.GenUUID
-import stupwise.engine.Engine
+import stupwise.common.models.{PlayerId, Reason}
 import stupwise.websocket.Protocol.{InMessage, OutMessage}
 
 trait Handler[F[_]] {
@@ -20,7 +20,6 @@ trait Handler[F[_]] {
 object Handler {
   def make[F[_]: GenUUID: Sync: Logger, In <: InMessage: Decoder, Out <: OutMessage: Encoder](
     topic: Topic[F, Out],
-    engine: Engine[F],
     dispatcher: Dispatcher[F]
   ): F[Handler[F]] = GenUUID[F].generate.map { playerId =>
     new Handler[F] {
@@ -31,13 +30,18 @@ object Handler {
           .map(msg => Text(WSCodecs.encode(msg)))
 
       def process(frame: WebSocketFrame): F[Unit] = frame match {
-        case Close(_)     => engine.handleError("socket closed")
+        case Close(_)     => ().pure[F]
         case Text(msg, _) =>
           WSCodecs
             .decode(msg)
-            .fold(e => engine.handleError(e.getMessage), msg => dispatcher.dispatch(playerId, msg))
+            .fold(
+              e => topic.publish1(OutMessage.Error(PlayerId(playerId), Reason(e.getMessage)).asInstanceOf[Out]).void,
+              msg => dispatcher.dispatch(playerId, msg)
+            )
         case e            =>
-          engine.handleError(s"Unexpected WS message: $e")
+          topic
+            .publish1(OutMessage.Error(PlayerId(playerId), Reason(s"Unexpected WS message: $e")).asInstanceOf[Out])
+            .void
       }
 
       def receive(wsfStream: Stream[F, WebSocketFrame]): Stream[F, Unit] =
