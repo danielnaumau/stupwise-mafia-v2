@@ -66,9 +66,7 @@ final case class CommandHandler[F[_]: Monad: GenUUID: Logger](stateStore: StateS
     case InitGame(_, roomId, variant) =>
       for {
         newState   <-
-          stateStore.updateState(s"state-lobby-$roomId-*")(s =>
-            s.changeStatus(RoomStatus.GameInProgress).flatMap(_.updateVersion())
-          )
+          stateStore.updateState(s"state-lobby-$roomId-*")(_.changeStatus(RoomStatus.GameInProgress))
         msgId      <- GenUUID.generate[F].map(MsgId(_))
         event       =
           newState

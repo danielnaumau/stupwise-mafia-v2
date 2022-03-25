@@ -48,12 +48,12 @@ object State {
     def changeStatus(newStatus: RoomStatus): Either[Reason, RoomState] = {
       val allowed = newStatus match {
         case RoomStatus.Init           => status == RoomStatus.GameInProgress
-        case RoomStatus.GameInProgress => true //status == RoomStatus.Init
+        case RoomStatus.GameInProgress => status == RoomStatus.Init
         case RoomStatus.Unknown        => false
       }
       Either.cond(
         allowed,
-        this.copy(status = newStatus),
+        this.copy(status = newStatus, version = version + 1),
         Reason(s"Room status cannot be changed from $status to $newStatus")
       )
     }
