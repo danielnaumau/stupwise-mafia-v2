@@ -68,7 +68,7 @@ lazy val gameCore = (project in file("modules/game-core"))
   .settings(dockerSettings("gameCore"))
 
 lazy val classicMafia = (project in file("modules/classic-mafia"))
-  .dependsOn(common)
+  .dependsOn(common, gameCore)
   .enablePlugins(JavaAppPackaging)
   .settings(dockerSettings("classicMafia"))
 

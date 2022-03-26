@@ -20,15 +20,14 @@ final case class CommandHandler[F[_]: Monad: GenUUID: Logger](stateStore: StateS
   def handle(
     command: LobbyCommand
   )(eventProducer: Producer[F, LobbyEvent], gameCommandProducer: Producer[F, GameCommand]): F[Unit] = command match {
-    case InitRoom(_, player) =>
+    case InitRoom(eventId, player) =>
       val state = RoomState.empty(List(player))
       for {
         res     <- stateStore.set(state)
-        eventId <- GenUUID.generate[F]
-        event    = if (res) RoomCreated(MsgId(eventId), state.roomId, player)
+        event    = if (res) RoomCreated(eventId, state.roomId, player)
                    else
                      LobbyError(
-                       MsgId(eventId),
+                       eventId,
                        state.roomId,
                        List(player.id),
                        Reason("Redis error while creating room")
@@ -37,41 +36,38 @@ final case class CommandHandler[F[_]: Monad: GenUUID: Logger](stateStore: StateS
         _       <- eventProducer.send(event)
       } yield ()
 
-    case JoinRoom(_, roomId, player) =>
+    case JoinRoom(eventId, roomId, player) =>
       for {
         newState <- stateStore.updateState(key(roomId))(_.addPlayer(player))
-        msgId    <- GenUUID.generate[F].map(MsgId(_))
         event     =
           newState.fold(
-            error => LobbyError(msgId, roomId, List(player.id), error),
-            res => PlayerJoined(msgId, roomId, res.players)
+            error => LobbyError(eventId, roomId, List(player.id), error),
+            res => PlayerJoined(eventId, roomId, res.players)
           )
         _        <- debug"Player ${player.userName} joined room"
         _        <- eventProducer.send(event)
       } yield ()
 
-    case LeaveRoom(_, roomId, playerId) =>
+    case LeaveRoom(eventId, roomId, playerId) =>
       for {
         newState <- stateStore.updateState(key(roomId))(_.removePlayer(playerId))
-        msgId    <- GenUUID.generate[F].map(MsgId(_))
         event     =
           newState.fold(
-            error => LobbyError(msgId, roomId, List(playerId), error),
-            res => PlayerLeft(msgId, roomId, res.players)
+            error => LobbyError(eventId, roomId, List(playerId), error),
+            res => PlayerLeft(eventId, roomId, res.players)
           )
         _        <- debug"Player $playerId left the room"
         _        <- eventProducer.send(event)
       } yield ()
 
-    case InitGame(_, roomId, variant) =>
+    case InitGame(eventId, roomId, variant) =>
       for {
         newState   <-
           stateStore.updateState(s"state-lobby-$roomId-*")(_.changeStatus(RoomStatus.GameInProgress))
-        msgId      <- GenUUID.generate[F].map(MsgId(_))
         event       =
           newState
-            .fold(error => LobbyError(msgId, roomId, Nil, error), st => GameInitiated(msgId, roomId, st.status))
-        gameCommand = newState.map(s => GameCommand.CreateGame(msgId, roomId, variant, s.players.map(_.id)))
+            .fold(error => LobbyError(eventId, roomId, Nil, error), st => GameInitiated(eventId, roomId, st.status))
+        gameCommand = newState.map(s => GameCommand.CreateGame(eventId, roomId, variant, s.players.map(_.id)))
         _          <- debug"Game in progress in room $roomId"
         _          <- eventProducer.send(event)
         _          <- gameCommand.map(gameCommandProducer.send(_)).getOrElse(().pure[F])
