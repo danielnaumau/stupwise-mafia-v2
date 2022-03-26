@@ -32,6 +32,19 @@ object State {
       )
     }
 
+    def removePlayer(playerId: PlayerId): Either[Reason, RoomState] = {
+      val playerExists = players.exists(pl => pl.id === playerId)
+
+      Either.cond(
+        playerExists,
+        this.copy(players = players.filter(pl => pl.id != playerId), version = version + 1),
+        Reason(s"No such player $playerId in the room $roomId")
+      )
+    }
+
+    def clear(): Either[Reason, RoomState] =
+      Right(this.copy(players = Nil))
+
     def changeStatus(newStatus: RoomStatus): Either[Reason, RoomState] = {
       val allowed = newStatus match {
         case RoomStatus.Init           => status == RoomStatus.GameInProgress
@@ -40,10 +53,12 @@ object State {
       }
       Either.cond(
         allowed,
-        this.copy(status = newStatus),
+        this.copy(status = newStatus, version = version + 1),
         Reason(s"Room status cannot be changed from $status to $newStatus")
       )
     }
+
+    def updateVersion(): Either[Reason, RoomState] = Right(this.copy(version = version + 1))
   }
 
   object RoomState {
@@ -60,6 +75,16 @@ object State {
   ) extends State {
     override def key: String        = s"state-game-${roomId.value}-$version"
     override def keyPattern: String = s"state-game-${roomId.value}-*"
+
+    def removePlayer(playerId: PlayerId): Either[Reason, GameState] = {
+      val playerExists = players.exists(pl => pl.id === playerId)
+
+      Either.cond(
+        playerExists,
+        this.copy(players = players.filter(pl => pl.id != playerId), version = version + 1),
+        Reason(s"No such player $playerId in the room $roomId")
+      )
+    }
   }
 
   object GameState {
