@@ -55,7 +55,7 @@ lazy val common = (project in file("modules/common"))
 lazy val websocket = (project in file("modules/websocket"))
   .dependsOn(common)
   .enablePlugins(JavaAppPackaging)
-  .settings(dockerSettings("websocket"))
+  .settings(dockerSettings("websocket"), libraryDependencies ++= Seq(Libraries.wsClient))
 
 lazy val lobby = (project in file("modules/lobby"))
   .dependsOn(common)

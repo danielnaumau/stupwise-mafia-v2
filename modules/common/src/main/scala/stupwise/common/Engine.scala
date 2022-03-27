@@ -15,7 +15,6 @@ trait Engine[F[_]] {
   def leaveRoom(roomId: RoomId, playerId: PlayerId): F[Unit]
 
   def startGame(roomId: RoomId, variant: GameVariant): F[Unit]
-  def stopGame(roomId: RoomId): F[Unit]
   def leaveGame(roomId: RoomId, playerId: PlayerId): F[Unit]
 }
 
@@ -61,17 +60,6 @@ object Engine {
       val command = for {
         msgId  <- GenUUID[F].generate.map(MsgId(_))
         command = LobbyCommand.InitGame(msgId, roomId, variant)
-      } yield command
-
-      val send = command.flatMap(lobbyProducer.send(_).handleErrorWith(e => error"Start game publish failed: $e"))
-
-      debug"Send start game msg" *> send
-    }
-
-    override def stopGame(roomId: RoomId): F[Unit] = {
-      val command = for {
-        msgId  <- GenUUID[F].generate.map(MsgId(_))
-        command = LobbyCommand.InitGame(msgId, roomId)
       } yield command
 
       val send = command.flatMap(lobbyProducer.send(_).handleErrorWith(e => error"Start game publish failed: $e"))

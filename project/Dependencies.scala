@@ -13,6 +13,7 @@ object Dependencies {
     val logback    = "1.2.10"
     val newType    = "0.4.4"
     val enumeratum = "1.7.0"
+    val wsClient   = "0.4.0"
   }
 
   object Libraries {
@@ -42,6 +43,8 @@ object Dependencies {
 
     val enumeratum      = "com.beachape" %% "enumeratum"       % V.enumeratum
     val enumeratumCirce = "com.beachape" %% "enumeratum-circe" % V.enumeratum
+
+    val wsClient = "com.github.andyglow" %% "websocket-scala-client" % V.wsClient
 
   }
 }

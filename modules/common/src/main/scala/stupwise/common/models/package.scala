@@ -3,7 +3,6 @@ package stupwise.common
 import cats.Eq
 import io.circe.{Decoder, Encoder}
 import io.estatico.newtype.macros.newtype
-import stupwise.common.models.RoomId
 import stupwise.common.models.game.{GamePhase, Role}
 
 import java.util.UUID
