@@ -29,9 +29,10 @@ object Engine {
         command = LobbyCommand.InitRoom(msgId, player)
       } yield command
 
-      val send = command.flatMap(lobbyProducer.send(_).handleErrorWith(e => error"Init room publish failed: $e"))
+      val send =
+        command.flatMap(lobbyProducer.send(_).handleErrorWith(e => error"Init room publish from engine failed: $e"))
 
-      debug"Send init room msg" *> send
+      debug"Send init room msg from engine" *> send
     }
 
     override def joinRoom(roomId: RoomId, player: LobbyPlayer): F[Unit] = {
@@ -40,9 +41,10 @@ object Engine {
         command = LobbyCommand.JoinRoom(msgId, roomId, player)
       } yield command
 
-      val send = command.flatMap(lobbyProducer.send(_).handleErrorWith(e => error"Join room publish failed: $e"))
+      val send =
+        command.flatMap(lobbyProducer.send(_).handleErrorWith(e => error"Join room publish from engine failed: $e"))
 
-      debug"Send join room $roomId msg" *> send
+      debug"Send join room $roomId msg from engine" *> send
     }
 
     override def leaveRoom(roomId: RoomId, playerId: PlayerId): F[Unit] = {
@@ -53,7 +55,7 @@ object Engine {
 
       val send = command.flatMap(lobbyProducer.send(_).handleErrorWith(e => error"Leave room publish failed: $e"))
 
-      debug"Send leave room $roomId msg" *> send
+      debug"Send leave room $roomId msg from engine" *> send
     }
 
     override def startGame(roomId: RoomId, variant: GameVariant): F[Unit] = {
@@ -62,9 +64,10 @@ object Engine {
         command = LobbyCommand.InitGame(msgId, roomId, variant)
       } yield command
 
-      val send = command.flatMap(lobbyProducer.send(_).handleErrorWith(e => error"Start game publish failed: $e"))
+      val send =
+        command.flatMap(lobbyProducer.send(_).handleErrorWith(e => error"Start game publish from engine failed: $e"))
 
-      debug"Send start game msg" *> send
+      debug"Send start game msg from engine" *> send
     }
 
     override def leaveGame(roomId: RoomId, playerId: PlayerId): F[Unit] = {
@@ -73,9 +76,10 @@ object Engine {
         command = GameCommand.LeaveGame(msgId, roomId, playerId)
       } yield command
 
-      val send = command.flatMap(gameProducer.send(_).handleErrorWith(e => error"Leave game publish failed: $e"))
+      val send =
+        command.flatMap(gameProducer.send(_).handleErrorWith(e => error"Leave game publish from engine failed: $e"))
 
-      debug"Leave game msg" *> send
+      debug"Leave game msg from engine" *> send
     }
   }
 }
