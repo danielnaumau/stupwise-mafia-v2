@@ -3,8 +3,7 @@ package stupwise.websocket
 import cats.Applicative
 import cats.effect.kernel.Sync
 import cats.implicits._
-import org.typelevel.log4cats.Logger
-import org.typelevel.log4cats.syntax._
+import org.typelevel.log4cats.slf4j.Slf4jLogger
 import stupwise.common.Engine
 import stupwise.common.models._
 import stupwise.websocket.Protocol.InMessage
@@ -16,7 +15,7 @@ trait Dispatcher[F[_]] {
 }
 
 object Dispatcher {
-  class Live[F[_]: Applicative: Sync: Logger](engine: Engine[F]) extends Dispatcher[F] {
+  class Live[F[_]: Applicative: Sync](engine: Engine[F]) extends Dispatcher[F] {
     override def dispatch(playerId: UUID, msg: InMessage): F[Unit] = {
       val process: F[Unit] = msg match {
         case InMessage.InitRoom(userName)            => engine.initRoom(LobbyPlayer(PlayerId(playerId), userName))
@@ -26,7 +25,11 @@ object Dispatcher {
         case InMessage.StartGame(roomId, _, variant) => engine.startGame(roomId, variant)
       }
 
-      debug"Receive message from WS: $msg, playerId: $playerId" *> process
+      for {
+        log <- Slf4jLogger.create[F]
+        _   <- log.debug(s"Receive message from WS: $msg, playerId: $playerId")
+        _   <- process
+      } yield ()
     }
   }
 }

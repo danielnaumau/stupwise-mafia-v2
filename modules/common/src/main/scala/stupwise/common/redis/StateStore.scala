@@ -15,7 +15,7 @@ final class StateStore[F[_]: Monad, S <: State: Decoder: Encoder](redis: RedisCo
   def latest(keyPattern: String): F[Option[S]] =
     for {
       allKeys <- redis.keys(keyPattern)
-      values  <- redis.mGet(allKeys.toSet).map(_.values)
+      values  <- if (allKeys.isEmpty) List.empty.pure[F] else redis.mGet(allKeys.toSet).map(_.values)
       result   = values.flatMap(jsonDecode[S](_).toOption).toList.sortBy(_.version).lastOption
     } yield result
 

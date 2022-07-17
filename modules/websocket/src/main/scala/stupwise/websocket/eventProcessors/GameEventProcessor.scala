@@ -1,21 +1,17 @@
-package stupwise.websocket
+package stupwise.websocket.eventProcessors
 
 import cats.Applicative
-import cats.implicits._
 import org.typelevel.log4cats.Logger
-import org.typelevel.log4cats.syntax._
 import stupwise.common.availableGames
 import stupwise.common.models.KafkaMsg.GameEvent
+import org.typelevel.log4cats.syntax._
+import cats.implicits._
 import stupwise.common.models.views.GameInfoView
 import stupwise.websocket.Protocol.OutMessage
-import stupwise.websocket.Protocol.OutMessage._
-
-trait GameEventProcessor[F[_]] {
-  def process(event: GameEvent): F[List[OutMessage]]
-}
+import stupwise.websocket.Protocol.OutMessage.{GameError, GameStarted, PlayerLeftGame}
 
 object GameEventProcessor {
-  class Live[F[_]: Applicative: Logger] extends GameEventProcessor[F] {
+  class Live[F[_]: Applicative: Logger] extends EventProcessor[F, GameEvent] {
     override def process(event: GameEvent): F[List[OutMessage]] = {
       val messages: List[OutMessage] = event match {
         case GameEvent.GameCreated(_, roomId, players, variant) =>

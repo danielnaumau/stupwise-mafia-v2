@@ -8,6 +8,7 @@ import stupwise.common.GenUUIDInstances._
 import stupwise.common.kafka.{Consumer, Fs2KafkaComponent, LogComponents, Producer}
 import stupwise.common.models.KafkaMsg.{GameCommand, GameEvent, LobbyCommand, LobbyEvent}
 import stupwise.websocket.Protocol.{InMessage, OutMessage}
+import stupwise.websocket.eventProcessors.{GameEventProcessor, LobbyEventProcessor}
 
 object Main extends IOApp with Fs2KafkaComponent with WSCodecs with LogComponents {
 
